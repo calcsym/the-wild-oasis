@@ -29,6 +29,7 @@
     "react/prop-types": "off",
     "prettier/prettier": "error",
     "react/no-unescaped-entities": "off",
-    "no-constant-condition": "off"
+    "no-constant-condition": "off",
+    "no-unused-vars": "off"
   }
 }

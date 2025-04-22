@@ -129,3 +129,13 @@ export async function deleteBooking(id) {
   }
   return data;
 }
+
+/*
+Hard code
+  let query = supabase
+    .from("bookings")
+    .select(
+      "id, created_at, startDate, endDate, numNights, numGuests, status, totalPrice, cabins(name), guests(fullName, email)",
+      { count: "exact" },
+    ).eq("status","unconfirmed").lte("totalPrice",5000);
+*/

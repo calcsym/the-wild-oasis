@@ -23,3 +23,8 @@ function Sidebar() {
 }
 
 export default Sidebar;
+
+/* <Uploader/> 
+supabase
+new row violates row-level security policy for table "bookings"
+*/

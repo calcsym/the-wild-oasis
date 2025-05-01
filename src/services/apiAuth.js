@@ -101,3 +101,11 @@ export async function updateCurrentUser({ password, fullName, avatar }) {
   if (error2) throw new Error(error2.message);
   return updatedUser;
 }
+
+/*
+const {data: session} = await supabase.auth.getSession();
+if(!session.session) return null;
+
+const {data: error} = await supabase.auth.getUser();
+
+*/

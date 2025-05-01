@@ -109,6 +109,8 @@ function List({ id, children }) {
   const { openId, position, close } = useContext(MenusContext);
   const ref = useOutsideClick(close, false);
 
+  // const ref= useOutsideClick(()=>{
+  // console.log("close from click outside"); close();});
   if (openId !== id) return null;
 
   return createPortal(

@@ -34,7 +34,7 @@ export function useBookings() {
   });
 
   // PRE-FETCHING
-  const pageCount = Math.ceil(count / PAGE_SIZE);
+  const pageCount = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   if (page < pageCount)
     queryClient.prefetchQuery({
@@ -48,5 +48,5 @@ export function useBookings() {
       queryFn: () => getBookings({ filter, sortBy, page: page - 1 }),
     });
 
-  return { isLoading, error, bookings, count };
+  return { isLoading, error, bookings: bookings ?? [], count: count ?? 0 };
 }

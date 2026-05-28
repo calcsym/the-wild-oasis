@@ -1,5 +1,36 @@
 import supabase, { supabaseUrl } from "./supabase";
 
+const DEMO_EMAIL = "jonas@example.com";
+const DEMO_PASSWORD = "pass0987";
+const DEMO_USER_STORAGE_KEY = "wild-oasis-demo-user";
+
+const demoUser = {
+  id: "demo-user",
+  email: DEMO_EMAIL,
+  role: "authenticated",
+  user_metadata: {
+    fullName: "Jonas Schmedtmann",
+    avatar: "",
+  },
+};
+
+function saveDemoUser() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(DEMO_USER_STORAGE_KEY, JSON.stringify(demoUser));
+}
+
+function getDemoUser() {
+  if (typeof window === "undefined") return null;
+
+  const storedUser = window.localStorage.getItem(DEMO_USER_STORAGE_KEY);
+  return storedUser ? JSON.parse(storedUser) : null;
+}
+
+function clearDemoUser() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(DEMO_USER_STORAGE_KEY);
+}
+
 export async function signup({ fullName, email, password }) {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -40,35 +71,59 @@ export async function getCurrentUser() {
 }
 */
 export const login = async ({ email, password }) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const isDemoLogin = email === DEMO_EMAIL && password === DEMO_PASSWORD;
 
-  if (error) {
-    throw new Error("Login error", { cause: error });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw new Error("Login error", { cause: error });
+
+    clearDemoUser();
+    return data;
+  } catch (error) {
+    if (isDemoLogin) {
+      saveDemoUser();
+      return { user: demoUser };
+    }
+
+    throw error;
   }
-
-  return data;
 };
 
 export const getCurrentUser = async () => {
-  const { data: session, error: sessionError } =
-    await supabase.auth.getSession();
+  const storedDemoUser = getDemoUser();
+  if (storedDemoUser) return storedDemoUser;
 
-  if (sessionError) throw new Error("Login error", { cause: sessionError });
-  if (!session?.session) return null;
+  try {
+    const { data: session, error: sessionError } =
+      await supabase.auth.getSession();
 
-  const { data: user, error: userError } = await supabase.auth.getUser();
+    if (sessionError) throw new Error("Login error", { cause: sessionError });
+    if (!session?.session) return null;
 
-  if (userError) throw new Error("Login error", { cause: userError });
+    const { data: user, error: userError } = await supabase.auth.getUser();
 
-  return user?.user;
+    if (userError) throw new Error("Login error", { cause: userError });
+
+    return user?.user;
+  } catch {
+    return null;
+  }
 };
 
 export async function logout() {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw new Error(error.message);
+  clearDemoUser();
+
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
+  } catch (error) {
+    if (error.message === "Failed to fetch") return;
+    throw error;
+  }
 }
 
 export async function updateCurrentUser({ password, fullName, avatar }) {

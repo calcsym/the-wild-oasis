@@ -39,7 +39,12 @@ export const useLogin = () => {
       navigate("/dashboard");
     },
 
-    onError: (error) => toast.error(`${error.message}: ${error.cause.message}`),
+    onError: (error) =>
+      toast.error(
+        error.cause?.message
+          ? `${error.message}: ${error.cause.message}`
+          : error.message,
+      ),
   });
 
   return { login, isLoading };
